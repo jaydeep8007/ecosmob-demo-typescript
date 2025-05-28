@@ -1,5 +1,5 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../sequelize';
+import { DataTypes, Model, Optional } from "sequelize";
+import sequelize from "../sequelize/sequelize";
 
 interface CustomerAttributes {
   id: number;
@@ -7,10 +7,13 @@ interface CustomerAttributes {
   email: string;
 }
 
-interface CustomerCreationAttributes extends Optional<CustomerAttributes, 'id'> {}
+interface CustomerCreationAttributes
+  extends Optional<CustomerAttributes, "id"> {}
 
-class Customer extends Model<CustomerAttributes, CustomerCreationAttributes>
-  implements CustomerAttributes {
+class Customer
+  extends Model<CustomerAttributes, CustomerCreationAttributes>
+  implements CustomerAttributes
+{
   public id!: number;
   public name!: string;
   public email!: string;
@@ -34,7 +37,7 @@ Customer.init(
     },
   },
   {
-    tableName: 'customers',
+    tableName: "customers",
     sequelize,
   }
 );

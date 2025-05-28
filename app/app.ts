@@ -1,22 +1,23 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
-import express, { Request, Response } from 'express';
-import cors from 'cors';
 
-import cookieParser from 'cookie-parser';
-import connectDatabase from './utils/utils.db';
+import express, { Request, Response } from "express";
+import cors from "cors";
 
-import sequelize from './sequelize/sequelize';
+import cookieParser from "cookie-parser";
+// import connectDatabase from './utils/utils.db';
 
+import sequelize from "./sequelize/sequelize";
 
-import customerRoutes from './routes/customerRoutes';
+import customerRoutes from "./routes/customerRoutes";
 
-sequelize.sync({ alter: true }) // or { force: true } for dev
+sequelize
+  .sync({ alter: true }) // or { force: true } for dev
   .then(() => {
-    console.log('✅ MySQL models synced');
+    console.log("✅ MySQL models synced");
   })
   .catch((err) => {
-    console.error('❌ Sequelize sync error:', err);
+    console.error("❌ Sequelize sync error:", err);
   });
 
 // Load environment variables from .env file
@@ -29,19 +30,17 @@ dotenv.config();
 const app = express();
 
 // Middleware
-// app.use(cors()); 
-app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:5173'] }));
+// app.use(cors());
+app.use(cors({ origin: ["http://localhost:3000", "http://localhost:5173"] }));
 app.use(cookieParser()); // Parse cookies
 app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
 
 // Routes
-// TODO: Import and use actual route modules here
-
-app.use('/api/customers', customerRoutes); 
+app.use("/api/v1/customers", customerRoutes);
 
 // Default route
-app.get('/', (req: Request, res: Response) => {
+app.get("/", (req: Request, res: Response) => {
   res.send("Demo TypeScript app check");
 });
 
