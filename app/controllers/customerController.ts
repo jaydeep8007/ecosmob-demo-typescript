@@ -22,37 +22,79 @@ export const getAllCustomers = async (req: Request, res: Response) => {
 export const getCustomerById = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    if (!id) return res.status(400).send("Customer ID is required");
+
+    if (!id) {
+       res.status(400).send({ status: 400, message: "Customer ID is required" });
+    }
 
     const customer = await Customer.findByPk(id);
-    if (!customer) return res.status(404).send("Customer not found");
 
-    res.json(customer);
+    if (!customer) {
+       res.status(404).send({ status: 404, message: "Customer not found" });
+    }
+
+     res.status(200).send({
+      status: "success",
+      message: "Customer retrieved successfully",
+      data: customer,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to retrieve customer", error });
+     res.status(500).send({
+      message: "Failed to retrieve customer",
+      error,
+    });
   }
 };
 
 export const updateCustomer = async (req: Request, res: Response) => {
   try {
     const customer = await Customer.findByPk(req.params.id);
-    if (!customer) return res.status(404).send("Customer not found");
-
-    await customer.update(req.body);
-    res.json(customer);
+    if (!customer) {
+       res.status(400).send({ status: 400, message: "Customer not found" });
+    }
+    const updatedFields = Object.keys(req.body);
+    const updatedCustomer = await Customer.update(req.body, {
+  where: { id: req.params.id }
+})
+  res.status(200).send({
+  status: "success",
+  message: "Customer updated successfully",
+  updatedFields,
+  data: updatedCustomer,
+}
+);
   } catch (error) {
-    res.status(500).json({ message: "Failed to update customer", error });
+     res.status(500).send({
+      message: "Failed to update customer",
+      error,
+    });
   }
 };
 
 export const deleteCustomer = async (req: Request, res: Response) => {
   try {
     const customer = await Customer.findByPk(req.params.id);
-    if (!customer) return res.status(404).send("Customer not found");
+    if (!customer) {
+      res.status(400).send({ status: 400, message: "Customer not found" });
+    }
 
-    await customer.destroy();
-    res.status(204).send();
+    await Customer.destroy({ where: { id: req.params.id } });
+
+    res
+      .status(200)
+      .send({ status: "success", message: "Customer deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Failed to delete customer", error });
   }
+  // try {
+  //   const customer = await Customer.findByPk(req.params.id);
+  //   if (!customer) return res.status(404).send("Customer not found");
+
+  //   await customer.destroy();
+  //   return res
+  //     .status(204)
+  //     .send({ status: "success", message: "Customer deleted successfully" });
+  // } catch (error) {
+  //   res.status(500).json({ message: "Failed to delete customer", error });
+  // }
 };

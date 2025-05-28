@@ -9,7 +9,7 @@ import cookieParser from "cookie-parser";
 
 import sequelize from "./sequelize/sequelize";
 
-import customerRoutes from "./routes/customerRoutes";
+import mainRoutes from "./routes/mainRoutes";
 
 sequelize
   .sync({ alter: true }) // or { force: true } for dev
@@ -37,10 +37,10 @@ app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
 
 // Routes
-app.use("/api/v1/customers", customerRoutes);
+app.use("/api/v1", mainRoutes);
 
 // Default route
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (req: Request, res: Response, next: any) => {
   res.send("Demo TypeScript app check");
 });
 

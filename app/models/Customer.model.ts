@@ -31,9 +31,9 @@ Customer.init(
       allowNull: false,
     },
     email: {
-      type: new DataTypes.STRING(128),
+      type: new DataTypes.STRING(),
       allowNull: false,
-      unique: true,
+      // unique: true,
     },
   },
   {
