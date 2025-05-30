@@ -4,15 +4,19 @@ dotenv.config();
 import express from "express";
 import logger from "morgan";
 import { get } from "./config/config";
+
 import bodyParser from "body-parser";
 import cors from "cors"; //For cross domain error
 import timeout from "connect-timeout";
 import session from "express-session";
 import compress from "compression";
-
 import cookieParser from "cookie-parser";
 
+//db connections
 import sequelize from "./config/sequelize";
+import { connectMongo } from "./config/mongoose"; // <-- Addd this
+
+const config = get(process.env.NODE_ENV);
 
 /* MAIN ROUTES */
 import router from "./routes/main.route";
@@ -68,20 +72,22 @@ function haltOnTimedout(req: any, res: any, next: any) {
 
 /* MAIN ROUTES FOR APP */
 app.use("/", router);
-
-// Server configuration
+// Server Start
 const PORT = process.env.PORT || 3000;
-/* CONNECT DATABASE AND START THE SERVER */
 app.listen(PORT, async () => {
   try {
-    await sequelize.authenticate();
-    console.log("Database connection has been established successfully.");
-    console.log("✅ MySQL models synced");
-
-    /* SYNC THE MODELS (create tables if they don't exist) */
-    await sequelize.sync();
+    if (config.database.DB_TYPE === "mysql") {
+      await sequelize.authenticate();
+      console.log("✅ MySQL connected successfully.");
+      await sequelize.sync();
+      console.log("✅ MySQL models synced");
+    } else if (config.database.DB_TYPE === "mongo") {
+      await connectMongo();
+    } else {
+      throw new Error("❌ Unsupported DB_TYPE in config.");
+    }
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    console.error("❌ Database connection failed:", error);
   }
-  console.log("App is listing on port " + PORT + " for demo node server");
+  console.log(`🚀 Server is running on port ${PORT}`);
 });

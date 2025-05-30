@@ -88,26 +88,20 @@
 //   }
 
 // };
+import { Request, Response, RequestHandler } from "express";
+import customerModel from "../../models/mysql/customer.model";
+import { customerValidations } from "../../validations/customer.validation";
+import commonQuery from "../../services/commonQuery.service";
+import { responseHandler } from "../../services/responseHandler.service";
+import { resCode } from "../../constants/resCode";
+import { msg } from "../../constants/en";
+import { hashPassword } from "../../services/password.service";
+import { UniqueConstraintError } from "sequelize";
 
-import { RequestHandler } from "express";
-import { Request, Response, NextFunction } from "express";
-import customerModel from "../models/customer.model";
-import { responseHandler } from "../services/responseHandler.service";
-import { customerValidations } from "../validations/customer.validation";
-import commonQuery from "../services/commonQuery.service";
-import { resCode } from "../constants/resCode";
-import { msg } from "../constants/en";
-import { hashPassword } from "../services/password.service";
-
-export const createCustomer: RequestHandler = async (
-  req: any,
-  res: any,
-  next: any
-) => {
+/* CREATE CUSTOMER */
+const addCustomer: RequestHandler = async (req, res, next) => {
   try {
-    const payload = req.body;
-    const result: any =
-      customerValidations.customerCreateSchema.safeParse(payload);
+    const result = customerValidations.customerCreateSchema.safeParse(req.body);
     if (!result.success) {
       return responseHandler.respondWithValidationFailed(
         res,
@@ -116,78 +110,101 @@ export const createCustomer: RequestHandler = async (
         result.error.flatten()
       );
     }
-    let customerData = result.data;
 
-    if (customerData.cus_password == customerData.cus_confirm_password) {
-      let control = new commonQuery(customerModel);
-      const addData = await control.create({
-        cus_firstname: customerData.cus_firstname,
-        cus_lastname: customerData.cus_lastname,
-        cus_email: customerData.cus_email,
-        cus_phone_number: customerData.cus_phone_number,
-        cus_password: await hashPassword(customerData.cus_password),
-        cus_confirm_password: await hashPassword(
-          customerData.cus_confirm_password
-        ),
-      });
-      return responseHandler.respondWithSuccessData(
-        res,
-        resCode.OK,
-        msg.customer.addsuccess,
-        addData
-      );
-    } else {
+    const data = result.data;
+
+    if (data.cus_password !== data.cus_confirm_password) {
       return responseHandler.respondWithFailed(
         res,
         resCode.BAD_REQUEST,
         msg.auth.passMatchConPass
       );
     }
-  } catch (error: any) {
-    console.error(error.errors, "Error");
-    return responseHandler.handleInternalError(error, next);
-  }
-};
 
-export const getAllCustomers = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const customers = await customerModel.findAll();
+    let control = new commonQuery(customerModel);
+    let allData = await control.create({
+      cus_firstname: data.cus_firstname,
+      cus_lastname: data.cus_lastname,
+      cus_email: data.cus_email,
+      cus_phone_number: data.cus_phone_number,
+      cus_password: await hashPassword(data.cus_password),
+      cus_confirm_password: await hashPassword(data.cus_confirm_password),
+    });
+
     return responseHandler.respondWithSuccessData(
       res,
-      200,
-      msg.dataFetchSuccess,
-      customers
+      resCode.OK,
+      msg.customer.addsuccess,
+      allData
     );
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof UniqueConstraintError) {
+      const field = error.errors?.[0]?.path;
+      const message =
+        field === "cus_email"
+          ? msg.auth.emailAlreadyExist
+          : field === "cus_phone_number"
+          ? "Phone number already exists"
+          : msg.ERROR;
+
+      return responseHandler.respondWithFailed(
+        res,
+        resCode.BAD_REQUEST,
+        message
+      );
+    }
+
     return responseHandler.handleInternalError(error, next);
   }
 };
-
-export const getCustomerById = async (
+const getCustomers = async (
   req: Request,
   res: Response,
-  next: NextFunction
-) => {
+  next: any
+): Promise<void> => {
   try {
-    const id = req.params.id;
+    const customers = await customerModel.findAll();
 
-    if (!id) {
-      return responseHandler.respondWithFailed(res, 400, msg.invalidId);
+    if (!customers || customers.length === 0) {
+      res.status(400).json({
+        success: false,
+        message: "User not found with specified Id.",
+        data: [],
+      });
+      return;
     }
 
+    res.status(200).json({
+      success: true,
+      message: "Data Fetched Successfully",
+      data: customers,
+    });
+  } catch (error) {
+    console.error("Error fetching customers:", error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+
+
+
+// Get Customer by ID
+const getCustomerById: RequestHandler = async (req, res, next) => {
+  try {
+    const id = req.params.id;
     const customer = await customerModel.findByPk(id);
 
     if (!customer) {
-      return responseHandler.respondWithFailed(res, 404, msg.invalidId);
+      return responseHandler.respondWithFailed(res, resCode.BAD_REQUEST, msg.invalidId);
     }
 
     return responseHandler.respondWithSuccessData(
       res,
-      200,
+      resCode.OK,
       msg.dataFetchSuccess,
       customer
     );
@@ -196,52 +213,69 @@ export const getCustomerById = async (
   }
 };
 
-export const updateCustomer = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+
+
+// Delete Customer
+const deleteCustomerById: RequestHandler = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const customer = await customerModel.findByPk(id);
+    const customer = await customerModel.findOne({ where: { cus_id: id } });
 
     if (!customer) {
-      return responseHandler.respondWithFailed(res, 400, msg.invalidId);
+      return responseHandler.respondWithFailed(res, resCode.BAD_REQUEST, msg.invalidId);
     }
 
-    await customerModel.update(req.body, { where: { id } });
+    await customerModel.destroy({ where: { cus_id: id } });
 
     return responseHandler.respondWithSuccessNoData(
       res,
-      200,
-      msg.dataUpdateSuccess
+      resCode.OK,
+      msg.dataDeleteSuccess
     );
   } catch (error) {
     return responseHandler.handleInternalError(error, next);
   }
 };
 
-export const deleteCustomer = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+
+const updateCustomer: RequestHandler = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const customer = await customerModel.findByPk(id);
+    const customer = await customerModel.findOne({ where: { cus_id: id } });
 
     if (!customer) {
-      return responseHandler.respondWithFailed(res, 400, msg.invalidId);
+      return responseHandler.respondWithFailed(res, resCode.BAD_REQUEST, msg.invalidId);
     }
 
-    await customerModel.destroy({ where: { id } });
+    await customerModel.update(req.body, { where: { cus_id: id } });
 
     return responseHandler.respondWithSuccessNoData(
       res,
-      200,
-      msg.dataDeleteSuccess
+      resCode.OK,
+      msg.dataUpdateSuccess
     );
   } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      (error as { name?: string }).name === "SequelizeUniqueConstraintError"
+    ) {
+      return responseHandler.respondWithFailed(
+        res,
+        resCode.BAD_REQUEST,
+        "Email or phone number already in use."
+      );
+    }
     return responseHandler.handleInternalError(error, next);
   }
+};
+
+
+export const customerControl = {
+  addCustomer,
+  getCustomers,
+  getCustomerById,
+  updateCustomer,
+  deleteCustomerById,
 };

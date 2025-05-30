@@ -73,72 +73,71 @@
 
 // export default Customer;
 
+import Sequelize from "sequelize";
+import { sequelize } from "../../config/sequelize";
 
-import Sequelize from 'sequelize';
-import { sequelize } from '../config/sequelize';
-
-const customerModel = sequelize.define('customer', {
-    cus_id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
-    },
-    cus_firstname: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        // validate: {
-        //     notEmpty: true,
-        //     len: 50
-        // },
-    },
-    cus_lastname: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        // validate: {
-        //     notEmpty: true,
-        //     len: 50
-        // },
-    },
-    cus_email: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-        // validate: {
-        //     notNull: {
-        //         msg: 'Email is required'
-        //     },
-        //     notEmpty: {
-        //         msg: 'Email cannot be empty'
-        //     },
-        //     isEmail: {
-        //         msg: 'Invalid email address'
-        //     },
-        //     len: 50
-        // }
-    },
-    cus_phone_number: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        // validate: {
-        //     is: /^[0-9]{10}$/i, // Validate that it's a 10-digit number
-        // },
-    },
-    cus_password: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        // validate: {
-        //     notEmpty: true,
-        //     len: [6, 20], // Password length between 6 and 20 characters
-        // },
-    },
-    cus_confirm_password: {
-        type: Sequelize.VIRTUAL,
-        allowNull: false,
-        // validate: {
-        //     notEmpty: true,
-        //     len: [6, 20], // Password length between 6 and 20 characters
-        // },
-    }
+const customerModel = sequelize.define("customer", {
+  cus_id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV4,
+    primaryKey: true,
+  },
+  cus_firstname: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    // validate: {
+    //     notEmpty: true,
+    //     len: 50
+    // },
+  },
+  cus_lastname: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    // validate: {
+    //     notEmpty: true,
+    //     len: 50
+    // },
+  },
+  cus_email: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    unique: true,
+    // validate: {
+    //     notNull: {
+    //         msg: 'Email is required'
+    //     },
+    //     notEmpty: {
+    //         msg: 'Email cannot be empty'
+    //     },
+    //     isEmail: {
+    //         msg: 'Invalid email address'
+    //     },
+    //     len: 50
+    // }
+  },
+  cus_phone_number: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    // validate: {
+    //     is: /^[0-9]{10}$/i, // Validate that it's a 10-digit number
+    // },
+  },
+  cus_password: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    // validate: {
+    //     notEmpty: true,
+    //     len: [6, 20], // Password length between 6 and 20 characters
+    // },
+  },
+  cus_confirm_password: {
+    type: Sequelize.VIRTUAL,
+    allowNull: false,
+    // validate: {
+    //     notEmpty: true,
+    //     len: [6, 20], // Password length between 6 and 20 characters
+    // },
+  },
 });
 
-export default customerModel
+export default customerModel;

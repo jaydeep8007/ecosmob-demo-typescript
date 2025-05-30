@@ -1,13 +1,13 @@
 import { RequestHandler } from "express";
-import customerModel from "../models/customer.model";
-import customerAuthModel from "../models/customerAuth.model";
-import { customerValidations } from "../validations/customer.validation";
-import commonQuery from "../services/commonQuery.service";
-import { responseHandler } from "../services/responseHandler.service";
-import { resCode } from "../constants/resCode";
-import { msg } from "../constants/en";
-import { comparePasswords } from "../services/password.service";
-import { authToken } from "../services/authToken.service";
+import customerModel from "../../models/mysql/customer.model";
+import customerAuthModel from "../../models/mysql/customerAuth.model";
+import { customerValidations } from "../../validations/customer.validation";
+import commonQuery from "../../services/commonQuery.service";
+import { responseHandler } from "../../services/responseHandler.service";
+import { resCode } from "../../constants/resCode";
+import { msg } from "../../constants/en";
+import { comparePasswords } from "../../services/password.service";
+import { authToken } from "../../services/authToken.service";
 
 const loginCustomer: RequestHandler = async (req: any, res: any, next: any) => {
   try {
