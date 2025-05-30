@@ -86,15 +86,5 @@ export const deleteCustomer = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ message: "Failed to delete customer", error });
   }
-  // try {
-  //   const customer = await Customer.findByPk(req.params.id);
-  //   if (!customer) return res.status(404).send("Customer not found");
-
-  //   await customer.destroy();
-  //   return res
-  //     .status(204)
-  //     .send({ status: "success", message: "Customer deleted successfully" });
-  // } catch (error) {
-  //   res.status(500).json({ message: "Failed to delete customer", error });
-  // }
+  
 };

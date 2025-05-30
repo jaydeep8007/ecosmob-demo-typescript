@@ -1,4 +1,5 @@
 import express from "express";
+const router = express.Router();
 import {
   createCustomer,
   getAllCustomers,
@@ -7,7 +8,11 @@ import {
   deleteCustomer,
 } from "../controllers/customerController";
 
-const router = express.Router();
+/* GET users listing. */
+router.get('/', function (req, res, next) {
+    res.send('respond with a resource');
+});
+
 
 router.post("/", createCustomer);
 router.get("/", getAllCustomers);
