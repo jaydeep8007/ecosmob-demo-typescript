@@ -15,7 +15,7 @@ import cookieParser from "cookie-parser";
 import sequelize from "./config/sequelize";
 
 /* MAIN ROUTES */
-import router from "./routes/mainRoutes";
+import router from "./routes/main.route";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -79,7 +79,7 @@ app.listen(PORT, async () => {
     console.log("✅ MySQL models synced");
 
     /* SYNC THE MODELS (create tables if they don't exist) */
-    await sequelize.sync({ force: true });
+    await sequelize.sync();
   } catch (error) {
     console.error("Unable to connect to the database:", error);
   }

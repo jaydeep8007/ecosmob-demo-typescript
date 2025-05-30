@@ -77,7 +77,7 @@
 import Sequelize from 'sequelize';
 import { sequelize } from '../config/sequelize';
 
-const Customer = sequelize.define('customer', {
+const customerModel = sequelize.define('customer', {
     cus_id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -141,4 +141,4 @@ const Customer = sequelize.define('customer', {
     }
 });
 
-export default Customer
+export default customerModel
